@@ -683,6 +683,8 @@
       .score-grid { grid-template-columns: 1fr; }
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
   <div class="shell">
@@ -764,14 +766,29 @@
           </details>
         </div>
 
+        <div class="share-footer" id="shareFooter" style="display: none; margin-top: 30px; padding-top: 30px; border-top: 1px dashed var(--line); align-items: center; justify-content: center; flex-direction: column; gap: 16px;">
+          <div style="font-size: 15px; font-weight: 800; color: var(--accent); letter-spacing: 0.05em;">长按或扫码，测测你的《三角洲行动》干员定位</div>
+          <div id="qrcodeBox" style="background: #fff; padding: 10px; border-radius: 8px;"></div>
+        </div>
+
         <div class="result-actions">
-          <div style="display:flex; gap:12px; flex-wrap:wrap;">
-            <button id="restartBtn" class="btn-secondary">重新测试</button>
-            <button id="toTopBtn" class="btn-primary">回到首页</button>
+          <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content: center; width: 100%;">
+            <button id="shareBtn" class="btn-primary" style="flex: 1; min-width: 140px; background: linear-gradient(90deg, #3b82f6, #2563eb); box-shadow: 0 12px 30px rgba(59, 130, 246, 0.25);">分享结果</button>
+            <button id="restartBtn" class="btn-secondary" style="flex: 1; min-width: 120px;">重新测试</button>
+            <button id="toTopBtn" class="btn-secondary" style="flex: 1; min-width: 120px;">回到首页</button>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- 分享图片弹窗 -->
+    <div id="shareModal" class="modal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); padding: 20px; align-items: center; justify-content: center; flex-direction: column;">
+      <div style="position: relative; max-width: 100%; max-height: 80vh; overflow-y: auto; border-radius: 16px; margin-bottom: 20px; text-align: center;">
+        <img id="shareImg" style="width: 100%; max-width: 400px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);" />
+      </div>
+      <div style="color: #fff; font-size: 14px; margin-bottom: 16px;">长按图片保存或分享</div>
+      <button id="closeShareBtn" class="btn-secondary" style="border-radius: 999px; padding: 10px 24px;">关闭</button>
+    </div>
 
   </div>
 
@@ -1244,7 +1261,67 @@
     document.getElementById('backIntroBtn').addEventListener('click', () => showScreen('intro'));
     document.getElementById('submitBtn').addEventListener('click', renderResult);
     document.getElementById('restartBtn').addEventListener('click', () => startTest(false));
-    document.getElementById('toTopBtn').addEventListener('click', () => showScreen('intro'));
+    document.getElementById('toTopBtn').addEventListener('click', () => {
+      app.answers = {};
+      app.history = [];
+      showScreen('intro');
+    });
+
+    // 分享功能逻辑
+    let qrcodeGenerated = false;
+    const shareBtn = document.getElementById('shareBtn');
+    const shareFooter = document.getElementById('shareFooter');
+    const resultActions = document.querySelector('.result-actions');
+    const shareModal = document.getElementById('shareModal');
+    const shareImg = document.getElementById('shareImg');
+
+    shareBtn.addEventListener('click', async () => {
+      const originalText = shareBtn.textContent;
+      shareBtn.textContent = '生成中...';
+      shareBtn.disabled = true;
+
+      // 生成二维码（只生成一次）
+      if (!qrcodeGenerated) {
+        new QRCode(document.getElementById("qrcodeBox"), {
+          text: window.location.href,
+          width: 100,
+          height: 100,
+          colorDark : "#000000",
+          colorLight : "#ffffff",
+          correctLevel : QRCode.CorrectLevel.M
+        });
+        qrcodeGenerated = true;
+      }
+
+      // 隐藏操作按钮，显示底部二维码
+      resultActions.style.display = 'none';
+      shareFooter.style.display = 'flex';
+
+      try {
+        const resultWrap = document.querySelector('.result-wrap');
+        const canvas = await html2canvas(resultWrap, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#141617' // 保证背景色和主题一致
+        });
+        
+        shareImg.src = canvas.toDataURL('image/png');
+        shareModal.style.display = 'flex';
+      } catch (err) {
+        console.error('生成图片失败:', err);
+        alert('生成图片失败，请稍后再试');
+      } finally {
+        // 恢复原有UI
+        resultActions.style.display = 'flex';
+        shareFooter.style.display = 'none';
+        shareBtn.textContent = originalText;
+        shareBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('closeShareBtn').addEventListener('click', () => {
+      shareModal.style.display = 'none';
+    });
   </script>
 
 </body>
