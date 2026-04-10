@@ -1205,7 +1205,8 @@
 
       const posterBox = document.getElementById('posterBox');
       const posterImage = document.getElementById('posterImage');
-      const imageSrc = TYPE_IMAGES[type.code];
+      const typeKey = Object.keys(TYPE_LIBRARY).find(k => TYPE_LIBRARY[k].code === type.code);
+      const imageSrc = TYPE_IMAGES[typeKey];
       if (imageSrc) {
         posterImage.src = imageSrc;
         posterImage.alt = `${type.code}（${type.cn}）`;
