@@ -1,7 +1,7 @@
 import urllib.request
 import os
 
-url = "https://img.18183.com/uploads/allimg/251117/520-25111G62518.jpg"
+url = "https://syimg.3dmgame.com/uploadimg/xiaz/2025/0520/1747704461568.jpg"
 path = "/workspace/image/delta_ops/HeartOfAfrica.jpg"
 
 try:
