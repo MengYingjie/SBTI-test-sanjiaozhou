@@ -1,58 +1,10 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <title>《三角洲行动》干员招募评估 - 所有结果预览</title>
-  <style>
-    :root {
-      --bg: #0f1112;
-      --panel: #1a1d1e;
-      --text: #e2e8f0;
-      --muted: #8b949e;
-      --line: #2d3748;
-      --soft: #23282b;
-      --accent: #fbbf24;
-      --accent-strong: #d97706;
-      --shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
-      --radius: 12px;
-    }
-    body {
-      font-family: sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 20px;
-    }
-    .result-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 30px;
-      display: flex;
-      gap: 20px;
-    }
-    .poster {
-      flex: 0 0 300px;
-    }
-    .poster img {
-      width: 100%;
-      border-radius: var(--radius);
-      background: #fff;
-    }
-    .info {
-      flex: 1;
-    }
-    h2 { color: var(--accent); margin-top: 0; }
-    h3 { margin-bottom: 5px; }
-    p { line-height: 1.6; color: var(--muted); margin-top: 5px; }
-    .kicker { color: var(--accent-strong); font-size: 14px; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <h1>所有可招募干员评估结果预览</h1>
-  <div id="container"></div>
+import re
 
-  <script>
+with open('generate_all_results.html', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# Update TYPE_LIBRARY and TYPE_IMAGES in generate_all_results.html as well
+new_script = """
     const TYPE_LIBRARY = {
       // 官方干员 1-14
       "Kai": { code: "红狼", cn: "凯·席尔瓦", intro: "动力外骨骼已就绪，准备突击！", desc: "你是天生的突击手。极高的战斗自信和进攻动机让你在战场上如鱼得水。你崇尚高机动的游击战术，往往能在对手反应过来之前就撕裂他们的防线。你不需要太多掩护，因为速度和爆发就是你最好的防御。" },
@@ -72,7 +24,7 @@
       // 热梗彩蛋 15-27
       "MandelBrick": { code: "曼德尔砖", cn: "狂热淘金者", intro: "钱！全是我的钱！", desc: "你测出了本次测试的隐藏结果！在你的眼里，战术、团队、任务都是浮云，只有高价值物资才是真理。你是一个彻头彻尾的“仓鼠”玩家，只要看到保险箱和曼德尔砖，你的多巴胺就会疯狂分泌。小心别为了物资把命搭进去哦！" },
       "Runner": { code: "摸金校尉", cn: "跑刀仔", intro: "打仗是不可能打仗的，只能跑跑刀。", desc: "系统无法将你归入任何常规干员编制。你不仅游离于战术体系之外，甚至连基本的火力配备都没有。你可能只是一个拿着小刀、穿梭在战场边缘的跑刀仔，试图在混乱中捡点破烂。祝你好运，别被流弹刮到了！" },
-      "HeartOfAfrica": { code: "非洲之心", cn: "顶级摸金校尉", intro: "1300万哈夫币！这波直接财富自由！", desc: "你测出了价值极高的“非洲之心”！在三角洲里，你是真正的“顶级摸金校尉”。你深知高风险高回报的道理，敢于深入巴别塔和航天基地的危险区域。你的运气和胆识都异于常人，摸出这颗T0级大红，你的队友都得抱着你的大腿喊义父。" },
+      "AfricanStar": { code: "非洲之星", cn: "African Star", intro: "又是一把白板...我的大金呢？", desc: "你测出了极其罕见的非酋体质！不管多高级的箱子，你摸出来永远是一堆破烂。你的运气差到了极点，建议以后搜刮物资这种事还是交给队友吧，你只负责打架就行了。" },
       "TearOfOcean": { code: "海洋之泪", cn: "欧皇本皇", intro: "随便摸一下就是天价物资，哎，无敌是多么寂寞。", desc: "你是万中无一的欧皇！你的运气好到离谱，随便打开一个垃圾桶都能摸出大金。队友都把你当成吉祥物供着，你是名副其实的“人形自走摸金机器”。" },
       "T6Juggernaut": { code: "六套战神", cn: "T6 Juggernaut", intro: "全身六套，莽就完事了！", desc: "你是名副其实的“氪金玩家”。全身最顶级的装备让你无所畏惧，你信奉“用金钱碾压一切”的战术。不需要什么花里胡哨的操作，站着让你打你都打不死我，这就是六套战神的底气！" },
       "DamGuard": { code: "大坝保安", cn: "Dam Guard", intro: "零号大坝，我的地盘我做主。", desc: "你是零号大坝的常驻保安。你对大坝的每一个角落、每一个地堡都了如指掌。你最喜欢在复杂的房区里和敌人捉迷藏，你是这片钢筋水泥森林里真正的“地头蛇”。" },
@@ -86,56 +38,40 @@
     };
 
     const TYPE_IMAGES = {
-      "Kai": "./image/delta_ops/Kai_official.jpg?v=1775826032",
-      "Terry": "./image/delta_ops/Terry_official.jpg?v=1775826032",
-      "Luna": "./image/delta_ops/Luna_official.jpg?v=1775826032",
-      "Roy": "./image/delta_ops/Roy_official.jpg?v=1775826032",
-      "Vyron": "./image/delta_ops/Vyron_official.jpg?v=1775826032",
-      "Hackclaw": "./image/delta_ops/Hackclaw_official.jpg?v=1775826032",
-      "David": "./image/delta_ops/David_official.jpg?v=1775826032",
-      "SilverWing": "./image/delta_ops/SilverWing.jpg?v=1775826032",
-      "Butterfly": "./image/delta_ops/Butterfly.jpg?v=1775826032",
-      "Bit": "./image/delta_ops/Bit.jpg?v=1775826032",
-      "Zoya": "./image/delta_ops/Zoya.jpg?v=1775826032",
-      "DeepBlue": "./image/delta_ops/DeepBlue.jpg?v=1775826032",
-      "Nameless": "./image/delta_ops/Nameless.jpg?v=1775826032",
-      "AsaraGuard": "./image/delta_ops/AsaraGuard.jpg?v=1775826032",
-      "MandelBrick": "./image/delta_ops/MandelBrick.png?v=1775826032",
-      "Runner": "./image/delta_ops/Runner.png?v=1775826032",
-      "HeartOfAfrica": "./image/delta_ops/HeartOfAfrica.jpg?v=1775826032",
-      "TearOfOcean": "./image/delta_ops/TearOfOcean.jpg?v=1775826032",
-      "T6Juggernaut": "./image/delta_ops/T6Juggernaut.jpg?v=1775826032",
-      "DamGuard": "./image/delta_ops/DamGuard.jpg?v=1775826032",
-      "LongbowSniper": "./image/delta_ops/LongbowSniper.jpg?v=1775826032",
-      "SpaceRat": "./image/delta_ops/SpaceRat.jpg?v=1775826032",
-      "ToeClipper": "./image/delta_ops/ToeClipper.png?v=1775826032",
-      "OutlineMaster": "./image/delta_ops/OutlineMaster.png?v=1775826032",
-      "MedicsDaddy": "./image/delta_ops/MedicsDaddy.jpg?v=1775826032",
-      "GrenadeGod": "./image/delta_ops/GrenadeGod.jpg?v=1775826032",
-      "TheRat": "./image/delta_ops/TheRat.jpg?v=1775826032"
+      "Kai": "./image/delta_ops/Kai.png",
+      "Terry": "./image/delta_ops/Terry.png",
+      "Luna": "./image/delta_ops/Luna.png",
+      "Roy": "./image/delta_ops/Roy.png",
+      "Vyron": "./image/delta_ops/Vyron.png",
+      "Hackclaw": "./image/delta_ops/Hackclaw.png",
+      "David": "./image/delta_ops/David.png",
+      "SilverWing": "./image/delta_ops/SilverWing.jpg",
+      "Butterfly": "./image/delta_ops/Butterfly.jpg",
+      "Bit": "./image/delta_ops/Bit.jpg",
+      "Zoya": "./image/delta_ops/Zoya.jpg",
+      "DeepBlue": "./image/delta_ops/DeepBlue.jpg",
+      "Nameless": "./image/delta_ops/Nameless.jpg",
+      "AsaraGuard": "./image/delta_ops/AsaraGuard.jpg",
+      "MandelBrick": "./image/delta_ops/MandelBrick.png",
+      "Runner": "./image/delta_ops/Runner.png",
+      "AfricanStar": "./image/delta_ops/AfricanStar.jpg",
+      "TearOfOcean": "./image/delta_ops/TearOfOcean.jpg",
+      "T6Juggernaut": "./image/delta_ops/T6Juggernaut.jpg",
+      "DamGuard": "./image/delta_ops/DamGuard.jpg",
+      "LongbowSniper": "./image/delta_ops/LongbowSniper.jpg",
+      "SpaceRat": "./image/delta_ops/SpaceRat.jpg",
+      "ToeClipper": "./image/delta_ops/ToeClipper.jpg",
+      "OutlineMaster": "./image/delta_ops/OutlineMaster.jpg",
+      "MedicsDaddy": "./image/delta_ops/MedicsDaddy.jpg",
+      "GrenadeGod": "./image/delta_ops/GrenadeGod.jpg",
+      "TheRat": "./image/delta_ops/TheRat.jpg"
     };
+"""
 
-    const container = document.getElementById('container');
-    
-    Object.keys(TYPE_LIBRARY).forEach(key => {
-      const op = TYPE_LIBRARY[key];
-      const imgSrc = TYPE_IMAGES[key];
-      
-      const card = document.createElement('div');
-      card.className = 'result-card';
-      card.innerHTML = `
-        <div class="poster">
-          <img src="${imgSrc}" alt="${op.cn}" onerror="this.src='https://via.placeholder.com/300x400?text=Image+Missing'">
-        </div>
-        <div class="info">
-          <div class="kicker">${key === 'MandelBrick' || key === 'Runner' ? '隐藏特殊人格' : '你的主类型'}</div>
-          <h2>${op.code}（${op.cn}）</h2>
-          <h3>“${op.intro}”</h3>
-          <p>${op.desc}</p>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  </script>
-</body>
-</html>
+script_pattern = re.compile(r'const TYPE_LIBRARY = \{.*?\n    };\n\n    const TYPE_IMAGES = \{.*?\n    };', re.DOTALL)
+content = script_pattern.sub(new_script.strip(), content)
+
+with open('generate_all_results.html', 'w', encoding='utf-8') as f:
+    f.write(content)
+
+print("Updated generate_all_results.html")
