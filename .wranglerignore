@@ -1,0 +1,7 @@
+.git
+.git/*
+**/.git
+**/.git/*
+*.py
+*.md
+.gitignore
