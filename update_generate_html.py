@@ -1,58 +1,10 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <title>《三角洲行动》干员招募评估 - 所有结果预览</title>
-  <style>
-    :root {
-      --bg: #0f1112;
-      --panel: #1a1d1e;
-      --text: #e2e8f0;
-      --muted: #8b949e;
-      --line: #2d3748;
-      --soft: #23282b;
-      --accent: #fbbf24;
-      --accent-strong: #d97706;
-      --shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
-      --radius: 12px;
-    }
-    body {
-      font-family: sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 20px;
-    }
-    .result-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 30px;
-      display: flex;
-      gap: 20px;
-    }
-    .poster {
-      flex: 0 0 300px;
-    }
-    .poster img {
-      width: 100%;
-      border-radius: var(--radius);
-      background: #fff;
-    }
-    .info {
-      flex: 1;
-    }
-    h2 { color: var(--accent); margin-top: 0; }
-    h3 { margin-bottom: 5px; }
-    p { line-height: 1.6; color: var(--muted); margin-top: 5px; }
-    .kicker { color: var(--accent-strong); font-size: 14px; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <h1>所有可招募干员评估结果预览</h1>
-  <div id="container"></div>
+import re
 
-  <script>
+with open('generate_all_results.html', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# Update TYPE_LIBRARY and TYPE_IMAGES in generate_all_results.html as well
+new_script = """
     const TYPE_LIBRARY = {
       // 官方干员 1-14
       "Kai": { code: "红狼", cn: "凯·席尔瓦", intro: "动力外骨骼已就绪，准备突击！", desc: "你是天生的突击手。极高的战斗自信和进攻动机让你在战场上如鱼得水。你崇尚高机动的游击战术，往往能在对手反应过来之前就撕裂他们的防线。你不需要太多掩护，因为速度和爆发就是你最好的防御。" },
@@ -114,28 +66,12 @@
       "GrenadeGod": "./image/delta_ops/GrenadeGod.jpg",
       "TheRat": "./image/delta_ops/TheRat.jpg"
     };
+"""
 
-    const container = document.getElementById('container');
-    
-    Object.keys(TYPE_LIBRARY).forEach(key => {
-      const op = TYPE_LIBRARY[key];
-      const imgSrc = TYPE_IMAGES[key];
-      
-      const card = document.createElement('div');
-      card.className = 'result-card';
-      card.innerHTML = `
-        <div class="poster">
-          <img src="${imgSrc}" alt="${op.cn}" onerror="this.src='https://via.placeholder.com/300x400?text=Image+Missing'">
-        </div>
-        <div class="info">
-          <div class="kicker">${key === 'MandelBrick' || key === 'Runner' ? '隐藏特殊人格' : '你的主类型'}</div>
-          <h2>${op.code}（${op.cn}）</h2>
-          <h3>“${op.intro}”</h3>
-          <p>${op.desc}</p>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  </script>
-</body>
-</html>
+script_pattern = re.compile(r'const TYPE_LIBRARY = \{.*?\n    };\n\n    const TYPE_IMAGES = \{.*?\n    };', re.DOTALL)
+content = script_pattern.sub(new_script.strip(), content)
+
+with open('generate_all_results.html', 'w', encoding='utf-8') as f:
+    f.write(content)
+
+print("Updated generate_all_results.html")
