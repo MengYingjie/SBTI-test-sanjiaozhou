@@ -1,0 +1,12 @@
+name = "workspace"
+compatibility_date = "2026-04-10"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[build]
+command = "mkdir -p dist && cp *.html *.js dist/ && cp -r image dist/"
+
+[assets]
+directory = "dist"
