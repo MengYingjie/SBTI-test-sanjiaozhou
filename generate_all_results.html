@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>《三角洲行动》干员招募评估 - 所有结果预览</title>
+  <style>
+    :root {
+      --bg: #0f1112;
+      --panel: #1a1d1e;
+      --text: #e2e8f0;
+      --muted: #8b949e;
+      --line: #2d3748;
+      --soft: #23282b;
+      --accent: #fbbf24;
+      --accent-strong: #d97706;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      --radius: 12px;
+    }
+    body {
+      font-family: sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+    }
+    .result-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 30px;
+      display: flex;
+      gap: 20px;
+    }
+    .poster {
+      flex: 0 0 300px;
+    }
+    .poster img {
+      width: 100%;
+      border-radius: var(--radius);
+      background: #fff;
+    }
+    .info {
+      flex: 1;
+    }
+    h2 { color: var(--accent); margin-top: 0; }
+    h3 { margin-bottom: 5px; }
+    p { line-height: 1.6; color: var(--muted); margin-top: 5px; }
+    .kicker { color: var(--accent-strong); font-size: 14px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>所有可招募干员评估结果预览</h1>
+  <div id="container"></div>
+
+  <script>
+    const TYPE_LIBRARY = {
+      "Kai": { code: "红狼", cn: "凯·席尔瓦", intro: "动力外骨骼已就绪，准备突击！", desc: "你是天生的突击手。极高的战斗自信和进攻动机让你在战场上如鱼得水。你崇尚高机动的游击战术，往往能在对手反应过来之前就撕裂他们的防线。你不需要太多掩护，因为速度和爆发就是你最好的防御。" },
+      "Terry": { code: "牧羊人", cn: "泰瑞·缪萨", intro: "防线已部署，你们背后交给我。", desc: "你是团队中最坚实的后盾。强烈的团队羁绊和稳重的决策让你成为不可或缺的工程兵。你擅长提前布防，化解敌方的每一波攻势。对于你来说，比起击杀敌人，确保队友的安全更具有战斗意义。" },
+      "Luna": { code: "露娜", cn: "金卢娜", intro: "侦察箭矢已升空，猎物无处遁形。", desc: "你是战场上的信息掌控者。敏锐的敌意感知和战术清晰度让你总能快人一步。你习惯在行动前获取充足的情报，不打无准备之仗。你的存在就像是团队的“天眼”，让战术布置变得精准而致命。" },
+      "Roy": { code: "蜂医", cn: "罗伊·斯米", intro: "别倒下，救援马上就到！", desc: "你是战场上最可靠的支援兵。极高的后背交托信任度和共情力让你始终关注着队友的状态。无论战况多么激烈，你都会优先保证团队的生存能力。有你在，队伍就拥有了源源不断的续航与希望。" },
+      "Vyron": { code: "威龙", cn: "王宇昊", intro: "动能辅助开启，看我把他们轰上天！", desc: "你是破局的利刃。极强的执行力度和进攻动机让你敢于在最危险的时刻挺身而出。你善于利用火力优势瞬间压制敌人，在局部战场形成突破。你就是那颗随时准备引爆的磁吸炸弹，生猛且无畏。" },
+      "Hackclaw": { code: "骇爪", cn: "麦晓雯", intro: "正在破译信号，敌方已成瞎子。", desc: "你是顶尖的电子攻防专家。战术灵活性和出色的欺骗技巧让你在战场上隐秘而致命。你不喜欢正面硬刚，更偏爱利用信息差和战术道具将敌人玩弄于股掌之间。你的每一次出手，都让对手防不胜防。" },
+      "David": { code: "乌鲁鲁", cn: "大卫·费莱尔", intro: "掩体已就绪，火力压制开始！", desc: "你是战场上的移动堡垒。极高的战术心理素质和阵型边界感让你在面对任何火力时都能稳如泰山。你擅长利用掩体和重火力掌控战场节奏。只要你在，防线就永远不会崩溃。" },
+      "MandelBrick": { code: "曼德尔砖", cn: "狂热淘金者", intro: "钱！全是我的钱！", desc: "你测出了本次测试的隐藏结果！在你的眼里，战术、团队、任务都是浮云，只有高价值物资才是真理。你是一个彻头彻尾的“仓鼠”玩家，只要看到保险箱和曼德尔砖，你的多巴胺就会疯狂分泌。小心别为了物资把命搭进去哦！" },
+      "Runner": { code: "摸金校尉", cn: "跑刀仔", intro: "打仗是不可能打仗的，只能跑跑刀。", desc: "系统无法将你归入任何常规干员编制。你不仅游离于战术体系之外，甚至连基本的火力配备都没有。你可能只是一个拿着小刀、穿梭在战场边缘的跑刀仔，试图在混乱中捡点破烂。祝你好运，别被流弹刮到了！" }
+    };
+
+    const TYPE_IMAGES = {
+      "Kai": "./image/delta_ops/Kai.png",
+      "Terry": "./image/delta_ops/Terry.png",
+      "Luna": "./image/delta_ops/Luna.png",
+      "Roy": "./image/delta_ops/Roy.png",
+      "Vyron": "./image/delta_ops/Vyron.png",
+      "Hackclaw": "./image/delta_ops/Hackclaw.png",
+      "David": "./image/delta_ops/David.png",
+      "MandelBrick": "./image/delta_ops/MandelBrick.png",
+      "Runner": "./image/delta_ops/MandelBrick.png"
+    };
+
+    const container = document.getElementById('container');
+    
+    Object.keys(TYPE_LIBRARY).forEach(key => {
+      const op = TYPE_LIBRARY[key];
+      const imgSrc = TYPE_IMAGES[key];
+      
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.innerHTML = `
+        <div class="poster">
+          <img src="${imgSrc}" alt="${op.cn}" onerror="this.src='https://via.placeholder.com/300x400?text=Image+Missing'">
+        </div>
+        <div class="info">
+          <div class="kicker">${key === 'MandelBrick' || key === 'Runner' ? '隐藏特殊人格' : '你的主类型'}</div>
+          <h2>${op.code}（${op.cn}）</h2>
+          <h3>“${op.intro}”</h3>
+          <p>${op.desc}</p>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  </script>
+</body>
+</html>
